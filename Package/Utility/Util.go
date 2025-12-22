@@ -88,7 +88,7 @@ func NewUtility(Mode int, Path string) (Utils, error) {
 	return ut, nil
 }
 
-func (Ut *Utils) CreateToken(userId int) (string, error) {
+func (Ut *Utils) CreateToken(userId int, TokenType string) (string, error) {
 
 	if userId < 1 {
 		return "", errors.New("Invalid Data!.")
@@ -105,6 +105,10 @@ func (Ut *Utils) CreateToken(userId int) (string, error) {
 		UserID:    userId,
 		IssuedAT:  time.Now(),
 		ExpiredAt: time.Now().Add(time.Duration(time.Now().Day())),
+	}
+
+	if TokenType != "Referesh" {
+		tkm.ExpiredAt = time.Now().Add(time.Hour)
 	}
 
 	tkn := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

@@ -54,15 +54,15 @@ func (Its *TestTokenStruct) TestVerifyToken() {
 
 }
 func (Its *TestTokenStruct) TestCreateToken() {
-	_, err := Its.Ut.CreateToken(0)
+	_, err := Its.Ut.CreateToken(0, "Referesh")
 	Its.Require().NotNil(err)
 
 	var nilId int
 
-	_, err = Its.Ut.CreateToken(nilId)
+	_, err = Its.Ut.CreateToken(nilId, "Referesh")
 	Its.Require().NotNil(err)
 
-	tkn, err := Its.Ut.CreateToken(Its.UserId)
+	tkn, err := Its.Ut.CreateToken(Its.UserId, "Referesh")
 	Its.Require().Nil(err)
 	Its.Require().Equal(len(tkn) >= 1, true)
 
@@ -76,7 +76,7 @@ func (Its *TestTokenStruct) BeforeTest(SuiteName string, TestName string) {
 	case "TestVerifyToken":
 		Its.Reset()
 		Its.UserId = 10
-		tkn, err := Its.Ut.CreateToken(Its.UserId)
+		tkn, err := Its.Ut.CreateToken(Its.UserId, "Referesh")
 		if err != nil {
 			Its.FailNow(err.Error())
 		}

@@ -13,6 +13,7 @@ type Config struct {
 	RDBCONNSTRING string `mapstructure:"RDBCONNSTRING"`
 	ADDRESS       string `mapstructure:"ADDRESS"`
 	JwtSecretKey  string `mapstructure:"JWTKEY"`
+	HashPassword  string `mapstructure:"HASHPASSWORD"`
 }
 
 func NewConfigurator(Path string) (Config, error) {
