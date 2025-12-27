@@ -7,6 +7,7 @@ import (
 
 	"github.com/FACELESS-GOD/CarbonCreditMarketPlaceAuthticationAPI/Helper/TokenType"
 	"github.com/FACELESS-GOD/CarbonCreditMarketPlaceAuthticationAPI/Package/Utility"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -21,6 +22,7 @@ type UserToken struct {
 	TokenID  uuid.UUID
 	RoleId   int
 	IssuedAT time.Time
+	jwt.RegisteredClaims
 }
 
 type ModelStruct struct {

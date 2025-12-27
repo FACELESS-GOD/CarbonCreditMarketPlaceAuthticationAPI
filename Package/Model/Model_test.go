@@ -107,7 +107,7 @@ func (Its *TestModelStruct) BeforeTest(SuiteName string, TestName string) {
 	switch TestName {
 	case "TestVerifyCred":
 		Its.Reset()
-		randNum, err := Its.Ut.RandomNumber(110)
+		randNum, err := Its.Ut.RandomNumber(10)
 		if err != nil {
 			Its.FailNow(err.Error())
 		}
@@ -139,7 +139,7 @@ func (Its *TestModelStruct) BeforeTest(SuiteName string, TestName string) {
 		}
 	case "TestAddRefereshTokenToDB":
 		Its.Reset()
-		randNum, err := Its.Ut.RandomNumber(110)
+		randNum, err := Its.Ut.RandomNumber(10)
 		if err != nil {
 			Its.FailNow(err.Error())
 		}
