@@ -1,6 +1,7 @@
 package Controller
 
 import (
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -129,6 +130,7 @@ func (Ctrl *ControllerStruct) CustomRecovery() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.Next()
 		if err := recover(); err != nil {
+			log.Println(err)
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 		}
 	}

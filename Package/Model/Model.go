@@ -167,10 +167,6 @@ func (Mdl *ModelStruct) VerifyCred(AuthDt LoginStruct) (bool, string, string, er
 			}
 		}
 
-		if len(hashPassword) >= 1 {
-			break
-		}
-
 	}
 
 	if len(hashPassword) < 1 {

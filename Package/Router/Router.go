@@ -1,4 +1,4 @@
-package router
+package Router
 
 import (
 	"github.com/FACELESS-GOD/CarbonCreditMarketPlaceAuthticationAPI/Package/Controller"
