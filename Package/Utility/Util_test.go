@@ -1,6 +1,7 @@
 package Utility
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/FACELESS-GOD/CarbonCreditMarketPlaceAuthticationAPI/Helper/DevMode"
@@ -98,4 +99,43 @@ func (Its *TestTokenStruct) AfterTest(SuiteName string, TestName string) {
 
 func (Its *TestTokenStruct) TearDownSuite() {
 	Its.Ut.DB.Close()
+}
+
+type TestUtil struct {
+	suite.Suite
+	ut Utils
+}
+
+func TestUtils(t *testing.T) {
+	suite.Run(t, &TestUtil{})
+}
+
+func TestTestUtil(testObj *testing.T) {
+	suite.Run(testObj, &TestTokenStruct{})
+}
+func (Ts *TestUtil) TestRandomNumber() {
+	num, err := Ts.ut.RandomNumber(0)
+	Ts.Require().NotNil(err)
+	num, err = Ts.ut.RandomNumber(10000000000000000)
+	Ts.Require().Nil(err)
+	fmt.Println(num)
+}
+
+func (Ts *TestUtil) TestRandomString() {
+	st, err := Ts.ut.RandomString(0)
+	Ts.Require().NotNil(err)
+	st, err = Ts.ut.RandomString(10000000000000000)
+	Ts.Require().NotNil(err)
+	st, err = Ts.ut.RandomString(10)
+	Ts.Require().Nil(err)
+	Ts.Require().Equal(len(st) >= 1, true)
+	fmt.Println(st)
+}
+
+func (Ts *TestUtil) SetupSuite() {
+	Ts.ut = Utils{}
+}
+
+func (Ts *TestUtil) TearDownSuite() {
+	//Ts.ut = nil
 }

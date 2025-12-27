@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"log"
+	"math/rand/v2"
 	"time"
 
 	"github.com/FACELESS-GOD/CarbonCreditMarketPlaceAuthticationAPI/Package/Configurator"
@@ -142,6 +143,42 @@ func (Ut *Utils) VerifyToken(Token string) (bool, TokenMetaData, error) {
 		return false, tkm, err
 	}
 	return true, tkm, err
+}
+
+// Generate Randomnumber range between 0 and Salt .
+func (Ut *Utils) RandomNumber(Salt int) (int32, error) {
+	if Salt < 1 {
+		return 0, errors.New("RandomSalt is less than 1")
+	}
+	return rand.Int32N(int32(Salt)), nil
+}
+
+// Generate Random String of lenght num and num cannot be less than 0 and greater than 256.
+func (Ut *Utils) RandomString(num int) (string, error) {
+
+	if num < 1 {
+		return "", errors.New("Length of string cannot be less than 1")
+	}
+
+	if num > 254 {
+		return "", errors.New("Length of string cannot be greated than 256")
+	}
+
+	base := "QWERTYUIOPASDFGHJKLZXCVBNM1234567890"
+
+	baseRandomString := []byte{}
+
+	for i := 1; i <= num; i++ {
+		newNumIndex, err := Ut.RandomNumber(len(base))
+		if err != nil {
+			log.Fatal(err)
+			return "", err
+		}
+		baseRandomString = append(baseRandomString, base[newNumIndex])
+	}
+
+	return string(baseRandomString), nil
+
 }
 
 // =========================================================================================================================================

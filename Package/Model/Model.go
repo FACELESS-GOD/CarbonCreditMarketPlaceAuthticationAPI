@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/FACELESS-GOD/CarbonCreditMarketPlaceAuthticationAPI/Helper/TokenType"
 	"github.com/FACELESS-GOD/CarbonCreditMarketPlaceAuthticationAPI/Package/Utility"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -20,7 +21,6 @@ type UserToken struct {
 	TokenID  uuid.UUID
 	RoleId   int
 	IssuedAT time.Time
-	Password string
 }
 
 type ModelStruct struct {
@@ -53,19 +53,19 @@ func NewModel(Ut Utility.Utils) (ModelStruct, error) {
 	return mdl, nil
 }
 
-func (Mdl *ModelStruct) VerifyCred(AuthDt LoginStruct) (bool, string, error) {
+func (Mdl *ModelStruct) VerifyCred(AuthDt LoginStruct) (bool, string, string, error) {
 	Mdl.Reset()
 
 	if len(AuthDt.Email) < 1 {
 		Mdl.IsAnyError = true
 		Mdl.ErrorMessages = append(Mdl.ErrorMessages, "Invalid Email")
-		return false, "", errors.New("Invalid Email")
+		return false, "", "", errors.New("Invalid Email")
 	}
 
 	if len(AuthDt.Password) < 1 {
 		Mdl.IsAnyError = true
 		Mdl.ErrorMessages = append(Mdl.ErrorMessages, "Invalid Length of Password")
-		return false, "", errors.New("Invalid Length of Password")
+		return false, "", "", errors.New("Invalid Length of Password")
 	}
 
 	ctx := context.WithoutCancel(context.Background())
@@ -75,7 +75,7 @@ func (Mdl *ModelStruct) VerifyCred(AuthDt LoginStruct) (bool, string, error) {
 	if err != nil {
 		Mdl.IsAnyError = true
 		Mdl.ErrorMessages = append(Mdl.ErrorMessages, err.Error())
-		return false, "", err
+		return false, "", "", err
 	}
 
 	response, err := db.Query(GetUserIDQuery, AuthDt.Email)
@@ -86,11 +86,11 @@ func (Mdl *ModelStruct) VerifyCred(AuthDt LoginStruct) (bool, string, error) {
 		if nerr != nil {
 			Mdl.IsAnyError = true
 			Mdl.ErrorMessages = append(Mdl.ErrorMessages, err.Error()+","+nerr.Error())
-			return false, "", errors.New(err.Error() + "," + nerr.Error())
+			return false, "", "", errors.New(err.Error() + "," + nerr.Error())
 		} else {
 			Mdl.IsAnyError = true
 			Mdl.ErrorMessages = append(Mdl.ErrorMessages, err.Error())
-			return false, "", err
+			return false, "", "", err
 		}
 	}
 
@@ -105,18 +105,13 @@ func (Mdl *ModelStruct) VerifyCred(AuthDt LoginStruct) (bool, string, error) {
 			if nerr != nil {
 				Mdl.IsAnyError = true
 				Mdl.ErrorMessages = append(Mdl.ErrorMessages, err.Error()+","+nerr.Error())
-				return false, "", errors.New(err.Error() + "," + nerr.Error())
+				return false, "", "", errors.New(err.Error() + "," + nerr.Error())
 			} else {
 				Mdl.IsAnyError = true
 				Mdl.ErrorMessages = append(Mdl.ErrorMessages, err.Error())
-				return false, "", err
+				return false, "", "", err
 			}
 		}
-
-		if userID >= 1 {
-			break
-		}
-
 	}
 
 	if userID < 1 {
@@ -125,11 +120,11 @@ func (Mdl *ModelStruct) VerifyCred(AuthDt LoginStruct) (bool, string, error) {
 		if nerr != nil {
 			Mdl.IsAnyError = true
 			Mdl.ErrorMessages = append(Mdl.ErrorMessages, "Email Does Not exits ,"+nerr.Error())
-			return false, "", errors.New("Email Does Not exits" + "," + nerr.Error())
+			return false, "", "", errors.New("Email Does Not exits" + "," + nerr.Error())
 		} else {
 			Mdl.IsAnyError = true
 			Mdl.ErrorMessages = append(Mdl.ErrorMessages, "Email Does Not exits")
-			return false, "", errors.New("Email Does Not exits")
+			return false, "", "", errors.New("Email Does Not exits")
 		}
 	}
 
@@ -143,11 +138,11 @@ func (Mdl *ModelStruct) VerifyCred(AuthDt LoginStruct) (bool, string, error) {
 		if nerr != nil {
 			Mdl.IsAnyError = true
 			Mdl.ErrorMessages = append(Mdl.ErrorMessages, err.Error()+","+nerr.Error())
-			return false, "", errors.New(err.Error() + "," + nerr.Error())
+			return false, "", "", errors.New(err.Error() + "," + nerr.Error())
 		} else {
 			Mdl.IsAnyError = true
 			Mdl.ErrorMessages = append(Mdl.ErrorMessages, err.Error())
-			return false, "", err
+			return false, "", "", err
 		}
 	}
 
@@ -162,11 +157,11 @@ func (Mdl *ModelStruct) VerifyCred(AuthDt LoginStruct) (bool, string, error) {
 			if nerr != nil {
 				Mdl.IsAnyError = true
 				Mdl.ErrorMessages = append(Mdl.ErrorMessages, err.Error()+","+nerr.Error())
-				return false, "", errors.New(err.Error() + "," + nerr.Error())
+				return false, "", "", errors.New(err.Error() + "," + nerr.Error())
 			} else {
 				Mdl.IsAnyError = true
 				Mdl.ErrorMessages = append(Mdl.ErrorMessages, err.Error())
-				return false, "", err
+				return false, "", "", err
 			}
 		}
 
@@ -182,11 +177,11 @@ func (Mdl *ModelStruct) VerifyCred(AuthDt LoginStruct) (bool, string, error) {
 		if nerr != nil {
 			Mdl.IsAnyError = true
 			Mdl.ErrorMessages = append(Mdl.ErrorMessages, "Password is Not Present ,"+nerr.Error())
-			return false, "", errors.New("Password is Not Present" + "," + nerr.Error())
+			return false, "", "", errors.New("Password is Not Present" + "," + nerr.Error())
 		} else {
 			Mdl.IsAnyError = true
 			Mdl.ErrorMessages = append(Mdl.ErrorMessages, "Password is Not Present")
-			return false, "", errors.New("Password is Not Present")
+			return false, "", "", errors.New("Password is Not Present")
 		}
 	}
 
@@ -196,7 +191,7 @@ func (Mdl *ModelStruct) VerifyCred(AuthDt LoginStruct) (bool, string, error) {
 	if err != nil {
 		Mdl.IsAnyError = true
 		Mdl.ErrorMessages = append(Mdl.ErrorMessages, err.Error())
-		return false, "", errors.New(err.Error())
+		return false, "", "", errors.New(err.Error())
 	}
 
 	isValid, err := Mdl.verifyHashPassword(hashPassword, AuthDt.Password)
@@ -204,18 +199,26 @@ func (Mdl *ModelStruct) VerifyCred(AuthDt LoginStruct) (bool, string, error) {
 	if isValid != true {
 		Mdl.IsAnyError = true
 		Mdl.ErrorMessages = append(Mdl.ErrorMessages, "Password is Not Correct")
-		return false, "", errors.New("Password is Not Correct")
+		return false, "", "", errors.New("Password is Not Correct")
 	}
 
-	tkn, err := Mdl.Ut.CreateToken(userID, "Referesh")
+	tkn, err := Mdl.Ut.CreateToken(userID, TokenType.RefereshToken)
 
 	if err != nil {
 		Mdl.IsAnyError = true
 		Mdl.ErrorMessages = append(Mdl.ErrorMessages, err.Error())
-		return false, "", errors.New(err.Error())
+		return false, "", "", errors.New(err.Error())
 	}
 
-	return true, tkn, nil
+	accessTkn, err := Mdl.Ut.CreateToken(userID, TokenType.AccessToken)
+
+	if err != nil {
+		Mdl.IsAnyError = true
+		Mdl.ErrorMessages = append(Mdl.ErrorMessages, err.Error())
+		return false, "", "", errors.New(err.Error())
+	}
+
+	return true, tkn, accessTkn, nil
 
 }
 
@@ -235,12 +238,12 @@ INSERT INTO TokenStore (
 ;
 `
 
-func (Mdl *ModelStruct) AddRefereshTokenToDB(TokenMetaData UserToken) (string, string, error) {
-	if TokenMetaData.UserID < 0 {
+func (Mdl *ModelStruct) AddRefereshTokenToDB(UserID int) (string, string, error) {
+	if UserID < 1 {
 		return "", "", errors.New("Invalid Data")
 	}
 
-	newtkn, err := Mdl.Ut.CreateToken(TokenMetaData.UserID, "Referesh")
+	newtkn, err := Mdl.Ut.CreateToken(UserID, TokenType.RefereshToken)
 	if err != nil {
 		return "", "", err
 	}
@@ -252,7 +255,7 @@ func (Mdl *ModelStruct) AddRefereshTokenToDB(TokenMetaData UserToken) (string, s
 		return "", "", err
 	}
 
-	response, err := db.Query(deleteToken, TokenMetaData.UserID)
+	response, err := db.Query(deleteToken, UserID)
 
 	if err != nil {
 		response.Close()
@@ -260,7 +263,7 @@ func (Mdl *ModelStruct) AddRefereshTokenToDB(TokenMetaData UserToken) (string, s
 	}
 	response.Close()
 
-	response, err = db.Query(InsertToken, TokenMetaData.UserID, newtkn)
+	response, err = db.Query(InsertToken, UserID, newtkn)
 
 	if err != nil {
 		response.Close()
@@ -272,7 +275,13 @@ func (Mdl *ModelStruct) AddRefereshTokenToDB(TokenMetaData UserToken) (string, s
 	if err != nil {
 		return "", "", err
 	}
-	return newtkn, newtkn, err
+
+	accesstkn, err := Mdl.Ut.CreateToken(UserID, TokenType.AccessToken)
+	if err != nil {
+		return "", "", err
+	}
+
+	return newtkn, accesstkn, err
 
 }
 
