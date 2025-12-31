@@ -29,6 +29,7 @@ func main() {
 		Util.DB.Close()
 		log.Fatal(err)
 	}
+
 	router, err := Router.NewRouter(Ctrl)
 	if err != nil {
 		Util.DB.Close()

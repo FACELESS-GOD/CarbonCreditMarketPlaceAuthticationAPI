@@ -74,6 +74,8 @@ func (Its *TestControllerStruct) TestRefereshToken() {
 	router.GET("/tkn", Its.Ctrl.AuthMiddleWare(), Its.Ctrl.RefereshToken)
 
 	recorder := httptest.NewRecorder()
+	recorder2 := httptest.NewRecorder()
+	recorder3 := httptest.NewRecorder()
 
 	cookie := http.Cookie{
 		Name:     "__host-http-Login",
@@ -119,6 +121,58 @@ func (Its *TestControllerStruct) TestRefereshToken() {
 	}
 	Its.Require().Equal(isPresent, true)
 
+	cookie2 := http.Cookie{
+		Name:     "__host-http-Login",
+		Value:    Its.RefereshToken,
+		Path:     "/",
+		Domain:   "localhost",
+		Expires:  time.Now().Add(48 * time.Hour),
+		MaxAge:   86400 * 2,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	req2, err := http.NewRequest("GET", "/tkn", nil)
+
+	if err != nil {
+		Its.FailNow(err.Error())
+	}
+
+	req2.AddCookie(&cookie2)
+
+	req2.Header.Add(HeaderCaption.Authorization, "Bearer ")
+
+	router.ServeHTTP(recorder2, req2)
+
+	Its.Require().NotEqual(200, recorder2.Code)
+
+	cookie3 := http.Cookie{
+		Name:     "__host-http-Login",
+		Value:    Its.RefereshToken,
+		Path:     "/",
+		Domain:   "localhost",
+		Expires:  time.Now().Add(48 * time.Hour),
+		MaxAge:   86400 * 2,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	req3, err := http.NewRequest("GET", "/tkn", nil)
+
+	if err != nil {
+		Its.FailNow(err.Error())
+	}
+
+	req3.AddCookie(&cookie3)
+
+	req3.Header.Add(HeaderCaption.Authorization, "Bearer aswdfv")
+
+	router.ServeHTTP(recorder3, req3)
+
+	Its.Require().NotEqual(200, recorder3.Code)
+
 }
 
 func (Its *TestControllerStruct) TestVerifyCred() {
@@ -127,7 +181,15 @@ func (Its *TestControllerStruct) TestVerifyCred() {
 
 	router.GET("/login", Its.Ctrl.VerifyCred)
 
-	recorder := httptest.NewRecorder()
+	recorder1 := httptest.NewRecorder()
+	recorder2 := httptest.NewRecorder()
+	recorder3 := httptest.NewRecorder()
+	recorder4 := httptest.NewRecorder()
+	recorder5 := httptest.NewRecorder()
+	recorder6 := httptest.NewRecorder()
+	recorder7 := httptest.NewRecorder()
+	recorder8 := httptest.NewRecorder()
+	recorder9 := httptest.NewRecorder()
 
 	currCred := Cred{
 		EMAIL:    Its.VerEmail,
@@ -145,15 +207,15 @@ func (Its *TestControllerStruct) TestVerifyCred() {
 		Its.FailNow(err.Error())
 	}
 
-	router.ServeHTTP(recorder, req1)
+	router.ServeHTTP(recorder1, req1)
 
-	Its.Require().Equal(200, recorder.Code)
+	Its.Require().Equal(200, recorder1.Code)
 
-	tkn := recorder.Result().Header.Get(HeaderCaption.Authorization)
+	tkn := recorder1.Result().Header.Get(HeaderCaption.Authorization)
 
 	Its.Require().Equal(len(tkn) >= 1, true)
 
-	cookies := recorder.Result().Cookies()
+	cookies := recorder1.Result().Cookies()
 	Its.Require().Equal(len(cookies) >= 1, true)
 
 	isPresent := false
@@ -166,6 +228,152 @@ func (Its *TestControllerStruct) TestVerifyCred() {
 		}
 	}
 	Its.Require().Equal(isPresent, true)
+
+	currCred2 := Cred{
+		EMAIL:    "Its.VerEmail",
+		PASSWORD: Its.VerPass,
+	}
+
+	jsonData, err = json.Marshal(&currCred2)
+
+	if err != nil {
+		Its.FailNow(err.Error())
+	}
+
+	req2, _ := http.NewRequest("GET", "/login", strings.NewReader(string(jsonData)))
+
+	router.ServeHTTP(recorder2, req2)
+
+	Its.Require().Equal(500, recorder2.Code)
+
+	currCred3 := Cred{
+		EMAIL:    "Its@VerEmail",
+		PASSWORD: Its.VerPass,
+	}
+
+	jsonData, err = json.Marshal(&currCred3)
+
+	if err != nil {
+		Its.FailNow(err.Error())
+	}
+
+	req3, _ := http.NewRequest("GET", "/login", strings.NewReader(string(jsonData)))
+
+	router.ServeHTTP(recorder3, req3)
+
+	Its.Require().Equal(500, recorder3.Code)
+
+	currCred4 := Cred{
+		EMAIL:    "Its@VerEmail.com",
+		PASSWORD: Its.VerPass,
+	}
+
+	jsonData, err = json.Marshal(&currCred4)
+
+	if err != nil {
+		Its.FailNow(err.Error())
+	}
+
+	req4, _ := http.NewRequest("GET", "/login", strings.NewReader(string(jsonData)))
+
+	router.ServeHTTP(recorder4, req4)
+
+	Its.Require().Equal(500, recorder4.Code)
+
+	// empty pass
+
+	currCred5 := Cred{
+		EMAIL:    "Its@VerEmail.com",
+		PASSWORD: "",
+	}
+
+	jsonData, err = json.Marshal(&currCred5)
+
+	if err != nil {
+		Its.FailNow(err.Error())
+	}
+
+	req5, _ := http.NewRequest("GET", "/login", strings.NewReader(string(jsonData)))
+
+	router.ServeHTTP(recorder5, req5)
+
+	Its.Require().Equal(500, recorder5.Code)
+
+	// wrong pass
+
+	currCred6 := Cred{
+		EMAIL:    "Test@Test.com",
+		PASSWORD: "Its",
+	}
+
+	jsonData, err = json.Marshal(&currCred6)
+
+	if err != nil {
+		Its.FailNow(err.Error())
+	}
+
+	req6, _ := http.NewRequest("GET", "/login", strings.NewReader(string(jsonData)))
+
+	router.ServeHTTP(recorder6, req6)
+
+	Its.Require().Equal(500, recorder6.Code)
+
+	// wrong email
+
+	currCred7 := Cred{
+		EMAIL:    "Its@l.com",
+		PASSWORD: "TestName",
+	}
+
+	jsonData, err = json.Marshal(&currCred7)
+
+	if err != nil {
+		Its.FailNow(err.Error())
+	}
+
+	req7, _ := http.NewRequest("GET", "/login", strings.NewReader(string(jsonData)))
+
+	router.ServeHTTP(recorder7, req7)
+
+	Its.Require().Equal(500, recorder7.Code)
+
+	// both wrong
+
+	currCred8 := Cred{
+		EMAIL:    "Its@VerEmail.com",
+		PASSWORD: Its.VerPass,
+	}
+
+	jsonData, err = json.Marshal(&currCred8)
+
+	if err != nil {
+		Its.FailNow(err.Error())
+	}
+
+	req8, _ := http.NewRequest("GET", "/login", strings.NewReader(string(jsonData)))
+
+	router.ServeHTTP(recorder8, req8)
+
+	Its.Require().Equal(500, recorder8.Code)
+
+	// correct cred
+
+	currCred9 := Cred{
+		EMAIL:    "Test@Test.com",
+		PASSWORD: "TestPassword",
+	}
+
+	jsonData, err = json.Marshal(&currCred9)
+
+	if err != nil {
+		Its.FailNow(err.Error())
+	}
+
+	req9, _ := http.NewRequest("GET", "/login", strings.NewReader(string(jsonData)))
+
+	router.ServeHTTP(recorder9, req9)
+
+	Its.Require().Equal(200, recorder9.Code)
 
 }
 
